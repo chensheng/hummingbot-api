@@ -277,6 +277,7 @@ class DockerService:
             )
             return {"success": True, "message": f"Instance {instance_name} created successfully."}
         except docker.errors.DockerException as e:
+            logger.error(f"Error to run docker container {instance_name}: {e}")
             return {"success": False, "message": str(e)}
 
     def _start_cleanup_thread(self):
