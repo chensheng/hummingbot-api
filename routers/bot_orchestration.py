@@ -644,7 +644,8 @@ async def deploy_v2_controllers(
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         script_config_filename = f"{deployment.instance_name}-{timestamp}.yml"
         # Use the same name with timestamp for the instance to ensure uniqueness
-        unique_instance_name = f"{deployment.instance_name}-{timestamp}"
+        # unique_instance_name = f"{deployment.instance_name}-{timestamp}"
+        unique_instance_name = deployment.instance_name
 
         # Ensure controller config names have .yml extension
         controllers_with_extension = []
