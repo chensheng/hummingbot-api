@@ -274,6 +274,8 @@ class DockerService:
                 tty=True,
                 stdin_open=True,
                 log_config=log_config,
+                mem_limit=config.mem_limit,
+                nano_cpus=config.nano_cpus, 
             )
             return {"success": True, "message": f"Instance {instance_name} created successfully."}
         except docker.errors.DockerException as e:

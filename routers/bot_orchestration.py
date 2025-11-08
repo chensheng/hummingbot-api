@@ -683,7 +683,9 @@ async def deploy_v2_controllers(
             credentials_profile=deployment.credentials_profile,
             image=deployment.image,
             script="v2_with_controllers.py",
-            script_config=script_config_filename
+            script_config=script_config_filename,
+            mem_limit=deployment.mem_limit,
+            nano_cpus=deployment.nano_cpus,
         )
         
         # Deploy the instance using the existing method

@@ -1,5 +1,6 @@
 import json
 import yaml
+import os
 from typing import Dict, List
 
 from fastapi import APIRouter, HTTPException
@@ -86,7 +87,7 @@ async def get_controller_config(config_name: str):
 
 
 @router.post("/configs/{config_name}", status_code=status.HTTP_201_CREATED)
-async def create_or_update_controller_config(config_name: str, config: Dict):
+async def create_or_update_controller_config(config_name: str, config: Dict, instance_name: str = ''):
     """
     Create or update controller configuration.
     
@@ -103,6 +104,12 @@ async def create_or_update_controller_config(config_name: str, config: Dict):
     try:
         yaml_content = yaml.dump(config, default_flow_style=False)
         fs_util.add_file('conf/controllers', f"{config_name}.yml", yaml_content, override=True)
+
+        if(instance_name != ''):
+            instance_dir = os.path.join("/hummingbot-api", "bots", 'instances', instance_name)
+            instance_controllers_path = os.path.join(instance_dir, "conf", "controllers")
+            if os.path.exists(instance_controllers_path):
+                fs_util.add_file(instance_controllers_path, f"{config_name}.yml", yaml_content, override=True)
         return {"message": f"Configuration '{config_name}' saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

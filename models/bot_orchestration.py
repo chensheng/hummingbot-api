@@ -102,6 +102,8 @@ class V2ScriptDeployment(BaseModel):
     script: Optional[str] = Field(default=None, description="Name of the script to run (without .py extension)")
     script_config: Optional[str] = Field(default=None, description="Name of the script configuration file (without .yml extension)")
     headless: bool = Field(default=False, description="Run in headless mode (no UI)")
+    mem_limit: Optional[str] = Field(default=None, description="Memory limit for the container")
+    nano_cpus: Optional[int] = Field(default=None, description="Nano CPUs for the container")
 
 
 class V2ControllerDeployment(BaseModel):
@@ -113,3 +115,5 @@ class V2ControllerDeployment(BaseModel):
     max_controller_drawdown_quote: Optional[float] = Field(default=None, description="Maximum allowed per-controller drawdown in quote usually USDT")
     image: str = Field(default="hummingbot/hummingbot:latest", description="Docker image for the Hummingbot instance")
     headless: bool = Field(default=False, description="Run in headless mode (no UI)")
+    mem_limit: Optional[str] = Field(default=None, description="Memory limit for the container")
+    nano_cpus: Optional[int] = Field(default=None, description="Nano CPUs for the container")
