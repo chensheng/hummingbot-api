@@ -226,9 +226,11 @@ class BotsOrchestrator:
         for controller, performance in controllers_performance.items():
             try:
                 # Check if all the metrics are numeric
-                _ = sum(metric for key, metric in performance.items() if key not in ("positions_summary", "close_type_counts"))
-                cleaned_performance[controller] = {"status": "running", "performance": performance}
+                _ = sum(metric for key, metric in performance.items() if key not in ("status", "positions_summary", "close_type_counts"))
+                status = performance["status"] if performance["status"] is not None else "running"
+                cleaned_performance[controller] = {"status": status, "performance": performance}
             except Exception as e:
+                logger.error(f"Determine controller performance error: {e}")
                 cleaned_performance[controller] = {
                     "status": "error",
                     "error": f"Some metrics are not numeric, check logs and restart controller: {e}",
