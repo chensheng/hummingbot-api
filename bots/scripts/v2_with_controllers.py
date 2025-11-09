@@ -4,7 +4,6 @@ from typing import Dict, List, Optional, Set
 
 from hummingbot.client.hummingbot_application import HummingbotApplication
 from hummingbot.connector.connector_base import ConnectorBase
-
 from hummingbot.core.event.events import MarketOrderFailureEvent
 from hummingbot.data_feed.candles_feed.data_types import CandlesConfig
 from hummingbot.strategy.strategy_v2_base import StrategyV2Base, StrategyV2ConfigBase
@@ -91,7 +90,11 @@ class V2WithControllers(StrategyV2Base):
 
     def send_performance_report(self):
         if self.current_timestamp - self._last_performance_report_timestamp >= self.performance_report_interval and self._pub:
-            performance_reports = {controller_id: self.get_performance_report(controller_id).dict() for controller_id in self.controllers.keys()}
+            performance_reports = {}
+            for controller_id in self.controllers.keys():
+                perf_report = self.get_performance_report(controller_id)
+                if perf_report is not None:
+                    performance_reports[controller_id] = perf_report.dict()
             self._pub(performance_reports)
             self._last_performance_report_timestamp = self.current_timestamp
 
