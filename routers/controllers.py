@@ -83,11 +83,12 @@ async def get_controller_config(config_name: str):
         config = fs_util.read_yaml_file(f"conf/controllers/{config_name}.yml")
         return config
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Configuration '{config_name}' not found")
+        return {}
+        #raise HTTPException(status_code=404, detail=f"Configuration '{config_name}' not found")
 
 
 @router.post("/configs/{config_name}", status_code=status.HTTP_201_CREATED)
-async def create_or_update_controller_config(config_name: str, config: Dict, instance_name: str = ''):
+async def create_or_update_controller_config(config_name: str, config: Dict):
     """
     Create or update controller configuration.
     
@@ -104,12 +105,6 @@ async def create_or_update_controller_config(config_name: str, config: Dict, ins
     try:
         yaml_content = yaml.dump(config, default_flow_style=False)
         fs_util.add_file('conf/controllers', f"{config_name}.yml", yaml_content, override=True)
-
-        if(instance_name != ''):
-            instance_dir = os.path.join("/hummingbot-api", "bots", 'instances', instance_name)
-            instance_controllers_path = os.path.join(instance_dir, "conf", "controllers")
-            if os.path.exists(instance_controllers_path):
-                fs_util.add_file(instance_controllers_path, f"{config_name}.yml", yaml_content, override=True)
         return {"message": f"Configuration '{config_name}' saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -313,7 +308,7 @@ async def get_bot_controller_configs(bot_name: str):
 
 
 @router.post("/bots/{bot_name}/{controller_name}/config")
-async def update_bot_controller_config(bot_name: str, controller_name: str, config: Dict):
+async def update_bot_controller_config(bot_name: str, controller_name: str, config: Dict, override: bool = True):
     """
     Update controller configuration for a specific bot.
     
@@ -333,9 +328,12 @@ async def update_bot_controller_config(bot_name: str, controller_name: str, conf
         raise HTTPException(status_code=404, detail=f"Bot '{bot_name}' not found")
     
     try:
-        current_config = fs_util.read_yaml_file(f"{bots_config_path}/{controller_name}.yml")
-        current_config.update(config)
-        fs_util.dump_dict_to_yaml(f"{bots_config_path}/{controller_name}.yml", current_config)
+        if override:
+            fs_util.dump_dict_to_yaml(f"{bots_config_path}/{controller_name}.yml", config)
+        else:
+            current_config = fs_util.read_yaml_file(f"{bots_config_path}/{controller_name}.yml")
+            current_config.update(config)
+            fs_util.dump_dict_to_yaml(f"{bots_config_path}/{controller_name}.yml", current_config)
         return {"message": f"Controller configuration for bot '{bot_name}' updated successfully"}
     except FileNotFoundError:
         raise HTTPException(
