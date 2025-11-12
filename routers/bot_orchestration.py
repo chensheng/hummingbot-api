@@ -643,7 +643,7 @@ async def deploy_v2_controllers(
         # Generate unique script config filename with timestamp
         #timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         #script_config_filename = f"{deployment.instance_name}-{timestamp}.yml"
-        script_config_filename = deployment.instance_name
+        script_config_filename = f"{deployment.instance_name}.yml"
         # Use the same name with timestamp for the instance to ensure uniqueness
         # unique_instance_name = f"{deployment.instance_name}-{timestamp}"
         unique_instance_name = deployment.instance_name
