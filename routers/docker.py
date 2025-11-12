@@ -109,11 +109,11 @@ async def remove_container(container_name: str, archive_locally: bool = True, s3
         HTTPException: 500 if archiving fails
     """
     # Validate that this is a Hummingbot container
-    if not container_name.startswith("hummingbot-"):
-        raise HTTPException(
-            status_code=400, 
-            detail=f"This endpoint only removes Hummingbot containers. Container '{container_name}' is not a Hummingbot container."
-        )
+    # if not container_name.startswith("hummingbot-"):
+    #     raise HTTPException(
+    #         status_code=400, 
+    #         detail=f"This endpoint only removes Hummingbot containers. Container '{container_name}' is not a Hummingbot container."
+    #     )
     
     # Remove the container
     response = docker_service.remove_container(container_name)
