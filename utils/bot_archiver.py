@@ -3,6 +3,7 @@ import shutil
 
 import boto3
 from botocore.exceptions import NoCredentialsError
+from datetime import datetime
 
 
 class BotArchiver:
@@ -40,11 +41,12 @@ class BotArchiver:
         print(f"Compressed {source_dir} into {output_path}")
 
     def archive_locally(self, instance_name, instance_dir, compress=False):
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         if compress:
-            archive_name = f"{instance_name}_archive.tar.gz"
+            archive_name = f"{instance_name}_archive_{timestamp}.tar.gz"
             archive_path = os.path.join('bots', 'archived', archive_name)
             self.compress_directory(instance_dir, archive_path)
             shutil.rmtree(instance_dir)  # Remove the instance directory
         else:
-            archive_path = os.path.join('bots', 'archived', instance_name)
+            archive_path = os.path.join('bots', 'archived', instance_name, timestamp)
             shutil.move(instance_dir, archive_path)
