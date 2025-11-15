@@ -66,6 +66,8 @@ class HummingbotDatabase:
             trade_fills = pd.read_sql_query(text(query), session.connection())
             trade_fills.rename(columns={"market": "connector_name", "symbol": "trading_pair"}, inplace=True)
             trade_fills[float_cols] = trade_fills[float_cols] / 1e6
+            # 确保 trade_fee_in_quote 是数值类型后再进行 cumsum 操作
+            trade_fills["trade_fee_in_quote"] = pd.to_numeric(trade_fills["trade_fee_in_quote"], errors='coerce')
             trade_fills["cum_fees_in_quote"] = trade_fills.groupby(groupers)["trade_fee_in_quote"].cumsum()
             trade_fills["trade_fee"] = trade_fills.groupby(groupers)["cum_fees_in_quote"].diff()
         return trade_fills
