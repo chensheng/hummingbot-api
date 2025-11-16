@@ -275,7 +275,8 @@ class DockerService:
                 stdin_open=True,
                 log_config=log_config,
                 mem_limit=config.mem_limit,
-                nano_cpus=config.nano_cpus, 
+                nano_cpus=config.nano_cpus,
+                restart_policy={"Name": "on-failure", "MaximumRetryCount": 3}
             )
             return {"success": True, "message": f"Instance {instance_name} created successfully."}
         except docker.errors.DockerException as e:
