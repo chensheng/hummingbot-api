@@ -187,6 +187,12 @@ class MQTTManager:
             for controller_id, performance in data.items():
                 if bot_id not in self._bot_performance:
                     self._bot_performance[bot_id] = {}
+                if isinstance(performance, dict):
+                    close_type_counts = performance.get("close_type_counts")
+                    if not close_type_counts:
+                        original_performance = self._bot_performance[bot_id].get(controller_id)
+                        if original_performance and isinstance(original_performance, dict):
+                            performance["close_type_counts"] = original_performance.get("close_type_counts")
                 self._bot_performance[bot_id][controller_id] = performance
 
     async def _handle_log(self, bot_id: str, data: Any):
