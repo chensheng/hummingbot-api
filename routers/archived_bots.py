@@ -99,8 +99,10 @@ async def get_database_performance(db_path: str):
                 "performance_data": []
             }
         
-        # Convert to records for JSON response
-        performance_records = performance_data.fillna(0).to_dict('records')
+        # Convert to records for JSON response, replacing NaN and infinity values
+        performance_data = performance_data.fillna(0)
+        performance_data = performance_data.replace([float('inf'), float('-inf')], 0)
+        performance_records = performance_data.to_dict('records')
         
         # Calculate summary statistics
         final_row = performance_data.iloc[-1] if len(performance_data) > 0 else {}
