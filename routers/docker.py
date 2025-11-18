@@ -123,7 +123,7 @@ async def remove_container(container_name: str, archive_locally: bool = True, s3
         # Archive the data
         if archive_locally:
             bot_archiver.archive_locally(container_name, instance_dir)
-        else:
+        elif s3_bucket is not None:
             bot_archiver.archive_and_upload(container_name, instance_dir, bucket_name=s3_bucket)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
