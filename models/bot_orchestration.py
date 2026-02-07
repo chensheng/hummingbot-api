@@ -104,6 +104,8 @@ class V2ScriptDeployment(BaseModel):
     headless: bool = Field(default=False, description="Run in headless mode (no UI)")
     mem_limit: Optional[str] = Field(default=None, description="Memory limit for the container")
     nano_cpus: Optional[int] = Field(default=None, description="Nano CPUs for the container")
+    network_mode: str = Field(default="host", description="Network mode for the container")
+    network: str = Field(default=None, description="Network for the container")
 
 
 class V2ControllerDeployment(BaseModel):
@@ -117,3 +119,5 @@ class V2ControllerDeployment(BaseModel):
     headless: bool = Field(default=False, description="Run in headless mode (no UI)")
     mem_limit: Optional[str] = Field(default=None, description="Memory limit for the container")
     nano_cpus: Optional[int] = Field(default=None, description="Nano CPUs for the container")
+    network_mode: str = Field(default="host", description="Network mode for the container")
+    network: str = Field(default=None, description="Network for the container")

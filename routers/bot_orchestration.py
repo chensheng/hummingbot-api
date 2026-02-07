@@ -687,6 +687,8 @@ async def deploy_v2_controllers(
             script_config=script_config_filename,
             mem_limit=deployment.mem_limit,
             nano_cpus=deployment.nano_cpus,
+            network_mode=deployment.network_mode,
+            network=deployment.network,
         )
         
         # Deploy the instance using the existing method
