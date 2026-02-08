@@ -10,6 +10,8 @@ from hummingbot.strategy.strategy_v2_base import StrategyV2Base, StrategyV2Confi
 from hummingbot.strategy_v2.models.base import RunnableStatus
 from hummingbot.strategy_v2.models.executor_actions import CreateExecutorAction, StopExecutorAction
 from hummingbot.strategy_v2.models.executors_info import PerformanceReport
+from hummingbot.strategy_v2.controllers.controller_base import ControllerBase
+from hummingbot.strategy_v2.models.executors import CloseType
 
 
 class V2WithControllersConfig(StrategyV2ConfigBase):
@@ -68,7 +70,7 @@ class V2WithControllers(StrategyV2Base):
             else:
                 current_drawdown = last_max_pnl - controller_pnl
                 if current_drawdown > self.config.max_controller_drawdown_quote:
-                    self.logger().info(f"Controller {controller_id} reached max drawdown. Stopping the controller.")
+                    self._log_info(controller, f"Stopping controller: {controller_id} Reason: reached max drawdown")
                     controller.stop()
                     executors_order_placed = self.filter_executors(
                         executors=self.get_executors_by_controller(controller_id),
@@ -107,7 +109,7 @@ class V2WithControllers(StrategyV2Base):
     def check_manual_kill_switch(self):
         for controller_id, controller in self.controllers.items():
             if controller.config.manual_kill_switch and controller.status == RunnableStatus.RUNNING:
-                self.logger().info(f"Manual cash out for controller {controller_id}.")
+                self._log_info(controller, f"Manual cash out for controller: {controller_id}.")
                 controller.stop()
                 executors_to_stop = self.get_executors_by_controller(controller_id)
                 self.executor_orchestrator.execute_actions(
@@ -118,7 +120,7 @@ class V2WithControllers(StrategyV2Base):
                     continue
                 if controller_id in self.shutdown_controllers:
                     continue
-                self.logger().info(f"Restarting controller {controller_id}.")
+                self._log_info(controller, f"Restarting controller: {controller_id}.")
                 controller.start()
     
     def check_controller_status(self):
@@ -133,8 +135,17 @@ class V2WithControllers(StrategyV2Base):
                 
                 if perf_report.close_type_counts is None or len(perf_report.close_type_counts) == 0:
                     continue
+
+                stoppable_close_types = [CloseType.STOP_LOSS, CloseType.TAKE_PROFIT, 
+                                       CloseType.TIME_LIMIT, CloseType.TRAILING_STOP, 
+                                       CloseType.EARLY_STOP, CloseType.EXPIRED, 
+                                       CloseType.FAILED, CloseType.COMPLETED, CloseType.INSUFFICIENT_BALANCE]
+                intersection = set(stoppable_close_types) & set(perf_report.close_type_counts.keys())
+                if not intersection:
+                    continue
                 
-                self.logger().info(f"Try to stop controller {controller_id} because closed executors found: {perf_report.close_type_counts}")
+                closed_type = list(intersection)[0]
+                self._log_info(controller, f"Stopping controller: {controller_id} Reason: {closed_type}")
                 self.shutdown_controllers.append(controller_id)
                 controller.stop()
                 executors_to_stop = self.get_executors_by_controller(controller_id)
@@ -196,3 +207,8 @@ class V2WithControllers(StrategyV2Base):
                             connectors_position_mode[config_dict["connector_name"]] = config_dict["position_mode"]
             for connector_name, position_mode in connectors_position_mode.items():
                 self.connectors[connector_name].set_position_mode(position_mode)
+    
+    def _log_info(self, controller: ControllerBase, msg: str):
+        connector_name = getattr(controller.config, 'connector_name', 'N/A')
+        trading_pair = getattr(controller.config, 'trading_pair', 'N/A')
+        self.logger().info(f"[{connector_name}][{trading_pair}] {msg}")
